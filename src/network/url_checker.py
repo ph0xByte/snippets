@@ -7,7 +7,6 @@ from colorama import Fore, Style, init
 
 
 init(autoreset=True)
-
 underline = '\033[4m'
 reset = '\033[0m'
 
@@ -98,7 +97,7 @@ class UrlChecker:
             headers_dict = {key: value for key, value in response.headers.items()}
             max_length = max(len(key) for key in headers_dict.keys())
             for key, value in headers_dict.items():
-                print(f'{Fore.GREEN}* {key.ljust(max_length)}{Style.RESET_ALL} : {Fore.BLUE}{value}{Style.RESET_ALL}')
+                print(f'{Fore.CYAN}* {key.ljust(max_length)}{Style.RESET_ALL} : {Fore.WHITE}{value}{Style.RESET_ALL}')
             print(90 * '-')
         except requests.exceptions.ConnectionError as e:
              print(f"{Fore.RED}Fehler: Die URL ist nicht erreichbar. Grund: {e}{Style.RESET_ALL}")
@@ -139,7 +138,6 @@ class UrlChecker:
             return
 
         print(f"\n{Fore.YELLOW + underline + Style.BRIGHT}Zertifikatsinformationen für:{Style.RESET_ALL + '\t' + Fore.BLUE + underline}{self.url}{Style.RESET_ALL}")
-        
 
         print(f"{Fore.CYAN}Subject:{Style.RESET_ALL}")
         for key, value in cert_info['subject'].items():
@@ -157,17 +155,37 @@ class UrlChecker:
         print(f"{Fore.CYAN}Signaturalgorithmus: \n{Style.RESET_ALL} * {cert_info['signature_algorithm']}")
         print(90 * '-')
 
+    def check_redirects(self):
+        initial_url = self.url
+        response = requests.get(initial_url, allow_redirects=True)
+        print(f"\n{Fore.YELLOW + underline + Style.BRIGHT}Redirects bei:{Style.RESET_ALL + '\t' + Fore.BLUE + underline}{self.url}{Style.RESET_ALL}")
+
+        if response.history:
+            for resp in response.history:
+                print(f"{Fore.RED}* {resp.url} - {resp.status_code}{Style.RESET_ALL}")  # History of redirects
+            print(f"{Fore.WHITE}* Anzahl Redirects: {len(response.history)}")        
+            print(f"{Fore.WHITE}* Finale URL: \t {Fore.BLUE}{response.url}")  # Final URL after redirection
+        else:
+            print(f"{Fore.GREEN}* Keine Redirects{Style.RESET_ALL}")
+
 
 if __name__ == "__main__":
     urls_to_check = [
-       'https://www.example.com'
+        'https://example.de',
     ]
-    
-    url = urls_to_check[0]
-   
-    checker = UrlChecker(url)
 
+    # Alle URLs checken
+    url = urls_to_check[7]
+    
+    checker = UrlChecker(url)
     checker.check_http_methods()
     checker.check_security_header()
     checker.print_certificate_info()
     checker.print_all_headers()
+    checker.check_redirects()
+
+    # Redirects für alle URLs checken
+    '''for url in urls_to_check:
+        checker = UrlChecker(url).check_redirects()
+    '''
+        
