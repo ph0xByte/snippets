@@ -170,11 +170,17 @@ class UrlChecker:
 
 
 if __name__ == "__main__":
+    
     urls_to_check = [
-        'https://example.de',
+        'https://example.com',                  # 0
     ]
-
-    # Alle URLs checken
+    # Check several URLs
+    for url in urls_to_check:
+        checker = UrlChecker(url)
+        checker.check_http_methods()
+        checker.check_security_header()
+    
+    # Check single URL    
     url = urls_to_check[7]
     
     checker = UrlChecker(url)
@@ -183,9 +189,3 @@ if __name__ == "__main__":
     checker.print_certificate_info()
     checker.print_all_headers()
     checker.check_redirects()
-
-    # Redirects für alle URLs checken
-    '''for url in urls_to_check:
-        checker = UrlChecker(url).check_redirects()
-    '''
-        
